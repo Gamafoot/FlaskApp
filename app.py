@@ -34,11 +34,11 @@ def connection_db(db_host, user_name, user_password, db_name):
 
 conn = connection_db('localhost', 'root', '', 'test') #Переменная с подключённой базой
 
+
 #-----------------------------Код сервера--------------------------------
 @app.route('/', methods=['POST', 'GET'])
 def main():
     logged = None
-    
     if 'logged' in session:
         logged = True
 
@@ -57,6 +57,9 @@ def main():
 
 @app.route('/send_request', methods=['POST'])
 def send_request():
+    if 'logged' in session:
+        logged = True
+        
     if request.method == 'POST':
         if request.form.get('date_send') == 'date':
             href = request.form['date'].split('-')
@@ -78,10 +81,14 @@ def send_request():
         #             except Exception as ex:
         #                 print(f'Ошибка при отправки сообщения: {ex}')
             
-    return render_template('base.html')
+    return render_template('base.html', logged=logged)
     
 @app.route('/<year>/<mouth>/<day>')
 def date_list(year,mouth,day):
+    
+    if 'logged' in session:
+        logged = True
+        
     with conn.cursor() as cur:
         cur.execute("SELECT date_reg, student_id FROM attendance")       
         ids = []      
@@ -91,18 +98,18 @@ def date_list(year,mouth,day):
             id = i[1]
             if time_arr[0] == year and time_arr[1] == mouth and time_arr[2] == day:
                 ids.append(id)
-        
-        users = []
-        
+            
+    users = []
+
+    with conn.cursor() as cur:      
         cur.execute("SELECT name, surname, telegram_id FROM students")
         el = cur.fetchall()
         for i in el:
             if str(i[2]) in str(ids):
                 res = str(i[0]) +" "+str(i[1])
                 users.append(res)
-            print(type(i[2]), type(i[0]))
-            print(type(i))
-    return render_template('list_users.html', list_users=users)
+        
+    return render_template('list_users.html', list_users=users, logged=logged)
 
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
