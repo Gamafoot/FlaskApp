@@ -2,6 +2,7 @@ import pymysql
 from flask import Flask, render_template, request, session, redirect
 import telebot
 from config import db_config
+import itertools
 
 DATABASE = 'attendance.sqlite3'
 SECRET_KEY = 'ad96e4f6c2a6ff454e6e63a8717a8726984e9230'
@@ -48,6 +49,7 @@ def main():
     
     return render_template('list_users.html', users=list_users, logged=logged)
 
+date = ''
 
 @app.route('/send_request', methods=['POST', 'GET'])
 def send_request():
@@ -80,30 +82,42 @@ def send_request():
 @app.route('/<year>/<mouth>/<day>', methods=['GET', 'POST'])
 def date_list(year,mouth,day):
     
+    para = None
+    
     if 'logged' in session:
         logged = True
         
     with conn.cursor() as cur:
-        cur.execute("SELECT date_reg, student_id FROM attendance")       
-        ids = []      
-        for i in cur.fetchall():
-            time = str(i[0])[:10]
-            time_arr = time.split('-')
-            id = i[1]
-            if time_arr[0] == year and time_arr[1] == mouth and time_arr[2] == day:
-                ids.append(id)
-            
-    users = []
-
-    with conn.cursor() as cur:      
-        cur.execute("SELECT name, surname, telegram_id FROM students")
-        el = cur.fetchall()
-        for i in el:
-            if str(i[2]) in str(ids):
-                res = str(i[0]) +" "+str(i[1])
-                users.append(res)
+        date = f'{year}-{mouth}-{day}'
+        cur.execute(f"SELECT students.name, students.surname, schedule.p_name FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id) WHERE date_reg = '{date}'")
+        desc = cur.description
+        column_names = [col[0] for col in desc]
+        data = [dict(zip(column_names, row)) for row in cur.fetchall()]
         
-    return render_template('list_users.html', list_users=users, logged=logged)
+        
+        print(data)
+        
+    # with conn.cursor() as cur:
+    #     cur.execute("SELECT date_reg, student_id FROM attendance")
+    #     ids = []      
+    #     for i in cur.fetchall():
+    #         time = str(i[0])[:10]
+    #         time_arr = time.split('-')
+    #         id = i[1]
+    #         if time_arr[0] == year and time_arr[1] == mouth and time_arr[2] == day:
+    #             ids.append(id)
+            
+    # users = []
+
+    # with conn.cursor() as cur:      
+    #     cur.execute("SELECT name, surname, telegram_id FROM students")
+    #     el = cur.fetchall()
+    #     for i in el:
+    #         if str(i[2]) in str(ids):
+    #             res = str(i[0]) +" "+str(i[1])
+    #             users.append(res)
+        
+    return render_template('list_users.html',para=para,  list_users='', logged=logged)
 
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
