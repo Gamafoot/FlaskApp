@@ -1,18 +1,13 @@
 import pymysql
 from flask import Flask, render_template, request, session, redirect
 import telebot
+from config import db_config
 
 DATABASE = 'attendance.sqlite3'
 SECRET_KEY = 'ad96e4f6c2a6ff454e6e63a8717a8726984e9230'
 ROOT_USER = '402501778'
 
 bot = telebot.TeleBot('2005932607:AAFAF_LCjBaM-Hkj_WDKnTUof0F0s0mJOlk')
-
-db_config = {
-    'host':'localhost',
-    'user':'root',
-    'pass':'root',
-}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -32,9 +27,8 @@ def connection_db(db_host, user_name, user_password, db_name):
         print(f'Ошибка подключения к базе:\n {ex} \n')
     return db
 
-conn = connection_db('localhost', 'root', '', 'test') #Переменная с подключённой базой
-
-
+conn = connection_db(db_config['host'],db_config['user'], db_config['passwd'], db_config['db']) #Переменная с подключённой базой
+conn.cursor()
 #-----------------------------Код сервера--------------------------------
 @app.route('/', methods=['POST', 'GET'])
 def main():
@@ -55,7 +49,7 @@ def main():
     return render_template('list_users.html', users=list_users, logged=logged)
 
 
-@app.route('/send_request', methods=['POST'])
+@app.route('/send_request', methods=['POST', 'GET'])
 def send_request():
     if 'logged' in session:
         logged = True
@@ -83,7 +77,7 @@ def send_request():
             
     return render_template('base.html', logged=logged)
     
-@app.route('/<year>/<mouth>/<day>')
+@app.route('/<year>/<mouth>/<day>', methods=['GET', 'POST'])
 def date_list(year,mouth,day):
     
     if 'logged' in session:
