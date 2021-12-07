@@ -1,9 +1,16 @@
-{%extends 'base.html'%}
+{% extends 'base.html' %}
 
-{%block content%}
-    {%for i in list_users%}
-    <div>
-        <h2>{{i}}</h2>
-    </div>
-    {%endfor%}
-{%endblock%}
+{% block content %}
+    {% for i in dic %}
+        <h3>{{i[0]}}</h3>
+        <ul>
+        {% for j in i[1] %}
+            {% for k in j %}
+                {% if k[1] == date %}
+                <li>{{k[0]}}</li>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock %}

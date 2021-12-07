@@ -79,50 +79,50 @@ def send_request():
             
     return render_template('base.html', logged=logged)
     
-@app.route('/<year>/<mouth>/<day>', methods=['GET', 'POST'])
+@app.route('/<year>/<mouth>/<day>', methods=['GET'])
 def date_list(year,mouth,day):
-    
-    para = None
-    
     if 'logged' in session:
         logged = True
-        
+            
+    #Преметы которые есть
+    all_p = []
+    #Словарь данных
+    dic_data = []
+
     with conn.cursor() as cur:
-        date = f'{year}-{mouth}-{day}'
-        cur.execute(f"SELECT students.name, students.surname, schedule.p_name FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id) WHERE date_reg = '{date}'")
+        cur.execute("SELECT students.name, students.surname, schedule.p_name, attendance.date_reg FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id)")
         desc = cur.description
         column_names = [col[0] for col in desc]
         data = [dict(zip(column_names, row)) for row in cur.fetchall()]
         
-        
-        print(data)
-        
-    # with conn.cursor() as cur:
-    #     cur.execute("SELECT date_reg, student_id FROM attendance")
-    #     ids = []      
-    #     for i in cur.fetchall():
-    #         time = str(i[0])[:10]
-    #         time_arr = time.split('-')
-    #         id = i[1]
-    #         if time_arr[0] == year and time_arr[1] == mouth and time_arr[2] == day:
-    #             ids.append(id)
+        for p in data:
+            if p['p_name'] not in all_p:
+                all_p.append(p['p_name'])
+                
+        for k in range(len(all_p)):
+            dic_data.append([])
+            dic_data[k].append(all_p[k])
+            dic_data[k].append([])
             
-    # users = []
-
-    # with conn.cursor() as cur:      
-    #     cur.execute("SELECT name, surname, telegram_id FROM students")
-    #     el = cur.fetchall()
-    #     for i in el:
-    #         if str(i[2]) in str(ids):
-    #             res = str(i[0]) +" "+str(i[1])
-    #             users.append(res)
+        for i in range(len(data)):
+            for j in range(len(dic_data)):
+                if data[i]['p_name'] == dic_data[j][0]:
+                    full_name = data[i]['name'] +" "+data[i]['surname']
+                    if len(dic_data[j][1]) < 1:
+                        dic_data[j][1].append([])
+                    date = str(data[i]['date_reg'])
+                    info = [full_name, date]
+                    dic_data[j][1][0].append(info)
         
-    return render_template('list_users.html',para=para,  list_users='', logged=logged)
+    current_date = f'{year}-{mouth}-{day}'
+        
+
+    return render_template('list_users.html',dic=dic_data, date=current_date, logged=logged)
 
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
     session.clear()
     return redirect('/')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
