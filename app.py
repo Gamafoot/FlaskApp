@@ -2,7 +2,6 @@ import pymysql
 from flask import Flask, render_template, request, session, redirect
 import telebot
 from config import db_config
-import itertools
 
 DATABASE = 'attendance.sqlite3'
 SECRET_KEY = 'ad96e4f6c2a6ff454e6e63a8717a8726984e9230'
@@ -124,10 +123,5 @@ def logout():
     session.clear()
     return redirect('/')
 
-<<<<<<< HEAD
 # if __name__ == '__main__':
 #     app.run(debug=True)
-=======
-if __name__ == '__main__':
-    app.run(debug=True)
->>>>>>> 0123eb0313dd805d6f4d5ac44946a0d26b3faeb2
