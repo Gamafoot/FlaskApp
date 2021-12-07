@@ -12,7 +12,7 @@ bot = telebot.TeleBot('2005932607:AAFAF_LCjBaM-Hkj_WDKnTUof0F0s0mJOlk')
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-
+# big dick boys club
 #-----------------------Покдючение к базе данных-----------------------
 def connection_db(db_host, user_name, user_password, db_name):
     db = None
@@ -124,5 +124,10 @@ def logout():
     session.clear()
     return redirect('/')
 
+<<<<<<< HEAD
 # if __name__ == '__main__':
 #     app.run(debug=True)
+=======
+if __name__ == '__main__':
+    app.run(debug=True)
+>>>>>>> 0123eb0313dd805d6f4d5ac44946a0d26b3faeb2
