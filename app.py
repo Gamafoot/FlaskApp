@@ -82,14 +82,16 @@ def send_request():
 def date_list(year,mouth,day):
     if 'logged' in session:
         logged = True
+        
+    date = f'{year}-{mouth}-{day}'
             
     #Преметы которые есть
     all_p = []
     #Словарь данных
     dic_data = []
-
+    
     with conn.cursor() as cur:
-        cur.execute("SELECT students.name, students.surname, schedule.p_name, attendance.date_reg FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id)")
+        cur.execute(f"SELECT students.name, students.surname, schedule.p_name FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id) WHERE date_reg = '{date}'")
         desc = cur.description
         column_names = [col[0] for col in desc]
         data = [dict(zip(column_names, row)) for row in cur.fetchall()]
@@ -107,11 +109,7 @@ def date_list(year,mouth,day):
             for j in range(len(dic_data)):
                 if data[i]['p_name'] == dic_data[j][0]:
                     full_name = data[i]['name'] +" "+data[i]['surname']
-                    if len(dic_data[j][1]) < 1:
-                        dic_data[j][1].append([])
-                    date = str(data[i]['date_reg'])
-                    info = [full_name, date]
-                    dic_data[j][1][0].append(info)
+                    dic_data[j][1].append(full_name)
         
     current_date = f'{year}-{mouth}-{day}'
         
@@ -123,5 +121,5 @@ def logout():
     session.clear()
     return redirect('/')
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)

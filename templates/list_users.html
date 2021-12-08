@@ -5,11 +5,7 @@
         <h3>{{i[0]}}</h3>
         <ul>
         {% for j in i[1] %}
-            {% for k in j %}
-                {% if k[1] == date %}
-                <li>{{k[0]}}</li>
-                {% endif %}
-            {% endfor %}
+            <li>{{j}}</li>
         {% endfor %}
         </ul>
     {% endfor %}
