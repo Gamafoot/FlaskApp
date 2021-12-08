@@ -57,11 +57,13 @@ def send_request():
         
     if request.method == 'POST':
         if request.form.get('date_send') == 'date':
-            href = request.form['date'].split('-')
-            year = href[0]
-            mouth = href[1]
-            day = href[2]
-            return redirect(f'{year}/{mouth}/{day}')
+            if len(request.form['date'].split('-')) > 2:
+                href = request.form['date'].split('-')
+                year = href[0]
+                mouth = href[1]
+                day = href[2]
+                return redirect(f'{year}/{mouth}/{day}')
+            return redirect('/')
         # Не удалять!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # if request.form.get('message_send') == 'msg':
         #     message = request.form.get('message')
@@ -84,7 +86,7 @@ def date_list(year,mouth,day):
         logged = True
         
     current_date = f'{year}-{mouth}-{day}'
-            
+    print(current_date)
     #Преметы которые есть
     all_p = []
     #Словарь данных
@@ -112,8 +114,7 @@ def date_list(year,mouth,day):
                     dic_data[j][1].append(full_name)
     
     num = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten']
-        
-
+    
     return render_template('list_users.html',dic=dic_data, date=current_date, num=num, logged=logged)
 
 @app.route('/logout', methods=['POST', 'GET'])
