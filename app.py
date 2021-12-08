@@ -83,7 +83,7 @@ def date_list(year,mouth,day):
     if 'logged' in session:
         logged = True
         
-    date = f'{year}-{mouth}-{day}'
+    current_date = f'{year}-{mouth}-{day}'
             
     #Преметы которые есть
     all_p = []
@@ -91,7 +91,7 @@ def date_list(year,mouth,day):
     dic_data = []
     
     with conn.cursor() as cur:
-        cur.execute(f"SELECT students.name, students.surname, schedule.p_name FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id) WHERE date_reg = '{date}'")
+        cur.execute(f"SELECT students.name, students.surname, schedule.p_name FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id) WHERE date_reg = '{current_date}'")
         desc = cur.description
         column_names = [col[0] for col in desc]
         data = [dict(zip(column_names, row)) for row in cur.fetchall()]
@@ -110,11 +110,11 @@ def date_list(year,mouth,day):
                 if data[i]['p_name'] == dic_data[j][0]:
                     full_name = data[i]['name'] +" "+data[i]['surname']
                     dic_data[j][1].append(full_name)
-        
-    current_date = f'{year}-{mouth}-{day}'
+    
+    num = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten']
         
 
-    return render_template('list_users.html',dic=dic_data, date=current_date, logged=logged)
+    return render_template('list_users.html',dic=dic_data, date=current_date, num=num, logged=logged)
 
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
