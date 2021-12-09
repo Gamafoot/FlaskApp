@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% if dic|length != 0%}
 <h1>Список:</h1>
 <div class="accordion" id="accordionPanelsStayOpenExample">
     {% for i in range(dic|length) %}
@@ -20,6 +21,9 @@
         </div>
       </div>
     </div>
-    {%endfor%}
+    {% endfor %}
 </div>
+{% else %}
+<h1>Список пуст</h1>
+{% endif %}
 {% endblock %}
