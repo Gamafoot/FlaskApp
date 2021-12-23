@@ -1,17 +1,18 @@
 import pymysql
 from flask import Flask, render_template, request, session, redirect
 import telebot
-from config import db_config
+from config import db_config, settings
 
-DATABASE = 'attendance.sqlite3'
-SECRET_KEY = 'ad96e4f6c2a6ff454e6e63a8717a8726984e9230'
-ROOT_USER = '402501778'
+#Настройки
+SECRET_KEY = settings['secret-key']
+ROOT_USER = settings['root-user']
 
-bot = telebot.TeleBot('2005932607:AAFAF_LCjBaM-Hkj_WDKnTUof0F0s0mJOlk')
+bot = telebot.TeleBot(settings['tg-bot'])
 
+#Приложение
 app = Flask(__name__)
 app.config.from_object(__name__)
-# big dick boys club
+
 #-----------------------Покдючение к базе данных-----------------------
 def connection_db(db_host, user_name, user_password, db_name):
     db = None
@@ -47,8 +48,6 @@ def main():
         list_users = cur.fetchall()
     
     return render_template('list_users.html', users=list_users, logged=logged)
-
-date = ''
 
 @app.route('/send_request', methods=['POST', 'GET'])
 def send_request():
@@ -86,34 +85,46 @@ def date_list(year,mouth,day):
         logged = True
         
     current_date = f'{year}-{mouth}-{day}'
-    print(current_date)
     #Преметы которые есть
     all_p = []
     #Словарь данных
     dic_data = []
     
     with conn.cursor() as cur:
-        cur.execute(f"SELECT students.name, students.surname, schedule.p_name FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id) WHERE date_reg = '{current_date}'")
-        desc = cur.description
-        column_names = [col[0] for col in desc]
-        data = [dict(zip(column_names, row)) for row in cur.fetchall()]
         
-        for p in data:
-            if p['p_name'] not in all_p:
-                all_p.append(p['p_name'])
-                
-        for k in range(len(all_p)):
-            dic_data.append([])
-            dic_data[k].append(all_p[k])
-            dic_data[k].append([])
+        #Добавляю какие пары были в этот день
+        cur.execute(f"SELECT p_name FROM attendance WHERE date(date_reg) = '{current_date}'")
+        q = cur.fetchall()
+        for p in q:
+            if p[0] not in all_p:
+                all_p.append(p[0])
+                         
+        #Люди которые есть в этот день
+        # cur.execute(f"SELECT students.name, students.surname, schedule.p_name FROM ((attendance INNER JOIN students ON attendance.student_id = students.telegram_id) INNER JOIN schedule ON attendance.p_id = schedule.id) WHERE date_reg = '{current_date}'")
+        for para in range(len(all_p)):
+            cur.execute(f"SELECT name, surname FROM students INNER JOIN attendance ON telegram_id=student_id WHERE date(date_reg)='{current_date}' AND p_name='{all_p[para]}'")
+            desc = cur.description
+            column_names = [col[0] for col in desc]
+            data = [dict(zip(column_names, row)) for row in cur.fetchall()]
             
-        for i in range(len(data)):
-            for j in range(len(dic_data)):
-                if data[i]['p_name'] == dic_data[j][0]:
-                    full_name = data[i]['name'] +" "+data[i]['surname']
-                    dic_data[j][1].append(full_name)
+            dic_data.append([all_p[para], [], []])
+            
+            for i in range(len(data)):
+                full_name = data[i]['name']+' '+data[i]['surname']
+                dic_data[para][1].append(full_name)
+                    
+        #Люди которых нет
+        for para in range(len(all_p)):
+            cur.execute(f"SELECT name, surname FROM students WHERE telegram_id NOT IN (SELECT student_id FROM attendance WHERE date(date_reg)='{current_date}' AND p_name='{all_p[para]}')")
+            desc = cur.description
+            column_names = [col[0] for col in desc]
+            data = [dict(zip(column_names, row)) for row in cur.fetchall()]
+            
+            for i in range(len(data)):
+                full_name = data[i]['name']+' '+data[i]['surname']
+                dic_data[para][2].append(full_name)
     
-    num = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten']
+    num = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'] #Для bootstrap
     
     return render_template('list_users.html',dic=dic_data, date=current_date, num=num, logged=logged)
 
@@ -122,5 +133,5 @@ def logout():
     session.clear()
     return redirect('/')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
