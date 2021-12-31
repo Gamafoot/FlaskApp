@@ -28,7 +28,11 @@ def connection_db(db_host, user_name, user_password, db_name):
         print(f'Ошибка подключения к базе:\n {ex} \n')
     return db
 
-conn = connection_db(db_config['host'],db_config['user'], db_config['passwd'], db_config['db']) #Переменная с подключённой базой
+conn = connection_db(
+        db_config['host'],
+        db_config['user'],
+        db_config['passwd'],
+        db_config['db']) #Переменная с подключённой базой
 conn.cursor()
 #-----------------------------Код сервера--------------------------------
 @app.route('/', methods=['POST', 'GET'])
@@ -127,7 +131,7 @@ def date_list(year,mouth,day):
     num = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'] #Для bootstrap
     
     return render_template('list_users.html',dic=dic_data, date=current_date, num=num, logged=logged)
-
+conn.commit()
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
     session.clear()
