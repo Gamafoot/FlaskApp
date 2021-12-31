@@ -8,16 +8,29 @@
     <div class="accordion-item">
       <h2 class="accordion-header" id="panelsStayOpen-heading{{num[i]}}">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse{{num[i]}}" aria-expanded="true" aria-controls="panelsStayOpen-collapse{{num[i]}}">
-            {{dic[i][0]}} {{dic[i][1]|length}}
+            {{dic[i][0]}}
         </button>
       </h2>
       <div id="panelsStayOpen-collapse{{num[i]}}" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-heading{{num[i]}}">
         <div class="accordion-body">
-            <ul class="list-group list-group-flush">
-                {% for j in range(dic[i][1]|length) %}
-                    <li class="list-group-item">{{j+1}}: {{dic[i][1][j]}}</li>
-                {% endfor %}
-            </ul>
+          <div class="row">
+            <div class="col">
+              <h5>Присутствующие ({{dic[i][1]|length}})</h5>
+              <ul class="list-group list-group-flush">
+                  {% for j in range(dic[i][1]|length) %}
+                      <li class="list-group-item">{{j+1}}: {{dic[i][1][j]}}</li>
+                  {% endfor %}
+              </ul>
+            </div>
+            <div class="col">
+              <h5>Отсутствующие ({{dic[i][2]|length}})</h5>
+              <ul class="list-group list-group-flush">
+                  {% for j in range(dic[i][2]|length) %}
+                      <li class="list-group-item">{{j+1}}: {{dic[i][2][j]}}</li>
+                  {% endfor %}
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
